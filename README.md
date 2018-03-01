@@ -20,10 +20,34 @@ callcenter.maxCallTime = 10
 Operator   <extends>  Employee 
 Supervisor <extends>  Employee
 Director   <extends>  Employee 
+
 Employee attributes:
   - String name
-  - Sring type
+  - String type
   - Integer priority
+  
+```
+
+## Main Classes
+
+```
+HomeController => Main App Controller with four API Post Methods:
+
+  - /operator    <== Create a new Operator in System (high priority - 1)
+  - /supervisor  <== Create a new Supervisor in System (priority - 2)
+  - /director    <== Create a new Director in System (priority - 3)
+  - /call        <== Simulate have a calling 
+
+EmployeeService => PriorityBlockingQueue Manager (Employee has Comparable interface)
+
+Dispatcher      => Process calls with a ConcurrentTaskExecutor <= ThreadPoolTaskExecutor 
+
+ThreadPoolTaskExecutor => callcenter.numThreads = 10 (Max Pool Size and Core Size)
+
+Application     =>  Spring Boot Application Configuration
+
+HomeControllerTest  =>  Tests the correct functioning of the required functionality
+
 ```
 
 ## Build
