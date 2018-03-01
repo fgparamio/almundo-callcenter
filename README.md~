@@ -14,11 +14,11 @@ callcenter.minCallTime = 5
 callcenter.maxCallTime = 10
 ```
 
-## Model UML Basic
+## Model
 
-Operator   <extends>  Employee 
-Supervisor <extends>  Employee
-Director   <extends>  Employee 
+Operator   -->  Employee 
+Supervisor -->  Employee
+Director   -->  Employee 
 
 
 ## Build
