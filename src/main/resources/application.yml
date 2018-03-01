@@ -35,6 +35,7 @@ info:
     description: ${project.description}
     version: ${project.version}
 
+---
 spring:
   profiles: test
   

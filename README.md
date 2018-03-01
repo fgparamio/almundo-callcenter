@@ -14,7 +14,11 @@ callcenter.minCallTime = 5
 callcenter.maxCallTime = 10
 ```
 
-## Usage
+## Model
+
+Operator   -->  Employee 
+Supervisor -->  Employee
+Director   -->  Employee 
 
 
 ## Build
@@ -30,15 +34,16 @@ mvn clean package
 To start the application, run:
 
 ```
-mvn spring-boot:run
+mvn spring-boot:run -Drun.arguments="spring.profiles.active=test"
+
 ```
 
-### Verify
+### Verify Swagger
 
 To verify the application is running, visit:
 
 ```
-http://localhost:8080/health
+http://localhost:8090/swagger-ui.html
 ```
 
 ## Testing
