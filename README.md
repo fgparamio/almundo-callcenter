@@ -16,10 +16,15 @@ callcenter.maxCallTime = 10
 
 ## Model UML Basic
 
+```
 Operator   <extends>  Employee 
 Supervisor <extends>  Employee
 Director   <extends>  Employee 
-
+Employee attributes:
+  - String name
+  - Sring type
+  - Integer priority
+```
 
 ## Build
 
