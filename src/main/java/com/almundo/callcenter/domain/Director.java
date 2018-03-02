@@ -11,7 +11,7 @@ public class Director extends Employee {
 	 * Default Constructor 
 	 */
 	public Director() {
-		super("DEFAULT_DIRECTOR", PriorityType.OPERATOR);
+		super("DEFAULT_DIRECTOR", PriorityType.DIRECTOR);
 	}
 	
 	/**
