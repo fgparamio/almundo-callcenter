@@ -19,11 +19,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-/*
- * This is the main Spring Boot application class. It configures Spring Boot, JPA, Swagger
- */
+
 /**
- * 
+ * Almundo CallCenter Application SpringBoot Configuration
  * @author fgparamio
  *
  */
@@ -35,21 +33,37 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class Application extends SpringBootServletInitializer implements AsyncConfigurer {
 
 	private static final Class<Application> applicationClass = Application.class;
+	
+	// Private slf4j Logger
 	private static final Logger LOG = LoggerFactory.getLogger(applicationClass);
 	
+	// Maximum threads in Thread Pool to attend by priority queue
 	@Value("${callcenter.numThreads}")
 	private Integer maxNumThreads;
 
+	/**
+	 *  ****************************** MAIN METHOD ********************************
+	 *
+	 * @param args
+	 */
 	public static void main(final String[] args) {
 		SpringApplication.run(applicationClass, args);
 	}
 
+	/**
+	 * Configure SpringApplicationBuilder
+	 */
 	@Override
 	protected SpringApplicationBuilder configure(final SpringApplicationBuilder application) {
 		return application.sources(applicationClass);
 	}
 
-
+	/**************************  SPRING CONTEXT CONFIGURATION   *********************/ 
+	
+	/**
+	 * 
+	 * @return ThreadPoolTaskExecutor context Bean
+	 */
 	@Bean
     public ThreadPoolTaskExecutor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
@@ -59,12 +73,19 @@ public class Application extends SpringBootServletInitializer implements AsyncCo
         return threadPoolTaskExecutor;
     }
 	
+	/**
+	 * @return Default Executor in Spring Context
+	 */
 	@Bean("callcenterExecutor")
 	@Override
 	public Executor getAsyncExecutor() {
 		return new ConcurrentTaskExecutor(threadPoolTaskExecutor());
 	}
 
+	/**
+	 * 
+	 * @return ExceptionHandler for AsyncConfigurer
+	 */
 	@Override
 	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
 		return (throwable, method, objects) -> LOG.error("-- exception handler -- " + throwable);

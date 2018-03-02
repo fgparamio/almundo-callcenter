@@ -23,23 +23,22 @@ import com.almundo.callcenter.service.EmployeeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-/*
- * Demonstrates how to set up RESTful API endpoints using Spring MVC
- */
+
 /**
- * 
+ * Almundo CallCenter Controller 
  * @author fgparamio
  *
  */
 @RestController
 @RequestMapping(value = "/almundo/v1/callcenter")
 @Api(tags = { "employees" })
-public class HomeController extends AbstractRestHandler {
+final public class AlmundoCallCenterController extends AbstractRestHandler {
 
-
+	// Employee Priority Queue Manager Service
 	@Autowired
 	private EmployeeService employeeService;
 
+	// Dispatcher Calls Service
 	@Autowired
 	private Dispatcher dispatcher;
 
@@ -101,11 +100,27 @@ public class HomeController extends AbstractRestHandler {
 	 * @throws ExecutionException
 	 */
 	@RequestMapping(value = "/call", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseStatus(HttpStatus.OK)
 	@ApiOperation(value = "Create a employee resource")
 	public void createCall(@RequestParam("message") String message, @RequestParam(name = "isWait", defaultValue = "false") Boolean isWait,
 			HttpServletRequest request, HttpServletResponse response) throws InterruptedException, ExecutionException {
 		this.dispatcher.dispatchCall(message, isWait);
 	}
 
+	
+	/**
+	 * 
+	 * @param message
+	 * @param isWait
+	 * @param request
+	 * @param response
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	@RequestMapping(value = "/employees", method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	@ApiOperation(value = "Create a employee resource")
+	public void deleteEmployyes(HttpServletRequest request, HttpServletResponse response) throws InterruptedException, ExecutionException {
+		this.employeeService.cleanEmployes();
+	}
 }

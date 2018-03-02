@@ -1,6 +1,7 @@
-package com.almundo.callcenter;
+package com.almundo.callcenter.api.rest;
 
 import static org.junit.Assert.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,36 +23,36 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.almundo.callcenter.api.rest.HomeController;
+import com.almundo.callcenter.Application;
+import com.almundo.callcenter.api.rest.AlmundoCallCenterController;
 import com.almundo.callcenter.domain.Director;
 import com.almundo.callcenter.domain.Operator;
 import com.almundo.callcenter.domain.Supervisor;
-import com.almundo.callcenter.service.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * 
+ * Almundo CallCenter Test
  * @author fgparamio
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
-public class HomeControllerTest {
+final public class AlmundoCallCenterControllerTest {
 
-	private static final Logger LOG = LoggerFactory.getLogger(HomeControllerTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AlmundoCallCenterControllerTest.class);
 
 	@InjectMocks
-	HomeController controller;
+	AlmundoCallCenterController controller;
 
 	@Autowired
 	WebApplicationContext context;
 
-	@Autowired
-	EmployeeService employeeService;
-
 	private MockMvc mvc;
 
+	/**
+	 * This method is executed before every @Test
+	 */
 	@Before
 	public void initTests() {
 
@@ -59,13 +60,18 @@ public class HomeControllerTest {
 
 		MockitoAnnotations.initMocks(this);
 		mvc = MockMvcBuilders.webAppContextSetup(context).build();
-		employeeService.cleanEmployes();
+		// Delete employees by EndPoint
+		deleteEmployees();
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void shouldAllOperatorReceiveCallsOK() throws Exception {
 
-		LOG.info(" *************** shouldAllOperatorReceiveCallsOK  ****************");
+		LOG.info(" ****************** shouldAllOperatorReceiveCallsOK  *******************");
 
 		IntStream.rangeClosed(1, 10).forEach(i -> createOperator(i));
 		IntStream.rangeClosed(1, 10).forEach(i -> createCall(i, "true"));
@@ -73,10 +79,14 @@ public class HomeControllerTest {
 
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void shouldOperatorsFirstOK() throws Exception {
 
-		LOG.info(" ******************* shouldOperatorsFirstOK  *********************");
+		LOG.info(" ********************** shouldOperatorsFirstOK  ************************");
 
 		// First calls dispatch operators by priority
 		IntStream.rangeClosed(1, 3).forEach(i -> createSupervisor(i));
@@ -87,59 +97,76 @@ public class HomeControllerTest {
 		Thread.sleep(15000);
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void shouldWaitingFreeThreads() throws Exception {
 
-		LOG.info(" ******************** shouldWaitingFreeThreads  *******************");
+		LOG.info(" *********************** shouldWaitingFreeThreads  **********************");
 
 		// Last ten calls waiting free threads
 		IntStream.rangeClosed(1, 3).forEach(i -> createSupervisor(i));
 		IntStream.rangeClosed(1, 2).forEach(i -> createDirector(i));
-		IntStream.rangeClosed(1, 10).forEach(i -> createOperator(i));		
+		IntStream.rangeClosed(1, 8).forEach(i -> createOperator(i));
 		IntStream.rangeClosed(1, 20).forEach(i -> createCall(i, "true"));
 
 		Thread.sleep(30000);
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void shouldNotWaitingFreeThreads() throws Exception {
 
-		LOG.info(" ******************** shouldNotWaitingFreeThreads  *****************");
+		LOG.info(" *********************** shouldNotWaitingFreeThreads  ********************");
 
 		// Last ten calls not waiting and finish
 		IntStream.rangeClosed(1, 3).forEach(i -> createSupervisor(i));
 		IntStream.rangeClosed(1, 2).forEach(i -> createDirector(i));
-		IntStream.rangeClosed(1, 8).forEach(i -> createOperator(i));		
+		IntStream.rangeClosed(1, 8).forEach(i -> createOperator(i));
 		IntStream.rangeClosed(1, 10).forEach(i -> createCall(i, "false"));
 
-		// Some request should not wait
-		for (int i = 0; i < 30; i++) {			
-			
-			mvc.perform(post("/almundo/v1/callcenter/call").param("message", "CALLING-"+(11+i)).param("isWait", "false")
-					.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON));
-		}
+		// Launchs 30 calls requests. Some request should not wait 
+		// Some Request with Cause => BusyConcurrentException 
+		IntStream.rangeClosed(1, 30).forEach(i -> {
+			try {
+				mvc.perform(post("/almundo/v1/callcenter/call").param("message", "CALLING-" + (10 + i))
+						.param("isWait", "false").contentType(MediaType.APPLICATION_JSON)
+						.accept(MediaType.APPLICATION_JSON));
+			} catch (Exception e) {
+				fail("API-REST not Working");
+			}
+		});
 
 		Thread.sleep(30000);
 	}
 
+	/**
+	 * 
+	 * @throws Exception
+	 */
 	@Test
 	public void shouldBadRequestBeacauseNotEmployees() throws Exception {
 
-		LOG.info(" *************** shouldBadRequestBeacauseNotEmployees  ****************");
+		LOG.info(" ****************** shouldBadRequestBeacauseNotEmployees  *******************");
 
+		// There isn't employes => Bad Request , Cause => BusyConcurrentException 
 		mvc.perform(post("/almundo/v1/callcenter/call").param("message", "CALLING-WITH-EMPLOYEES")
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 
 	}
 
-	/***********************************    PRIVATE METHODS    ********************************* /
-
-	/**
+	/**********************************   PRIVATE METHODS   ********************************* /
 	 * 
-	 * @param number
+	 * 
+	 * @param number of Operator ID
 	 */
-	private void createOperator(int number) {
+	private void createOperator(final int number) {
 		try {
 			mvc.perform(post("/almundo/v1/callcenter/operator").content(toJson(new Operator("OPERATOR-" + number)))
 					.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -151,9 +178,9 @@ public class HomeControllerTest {
 
 	/**
 	 * 
-	 * @param number
+	 * @param number of Supervisor ID
 	 */
-	private void createSupervisor(int number) {
+	private void createSupervisor(final int number) {
 
 		try {
 			mvc.perform(
@@ -167,9 +194,9 @@ public class HomeControllerTest {
 
 	/**
 	 * 
-	 * @param number
+	 * @param number of director ID
 	 */
-	private void createDirector(int number) {
+	private void createDirector(final int number) {
 
 		try {
 			mvc.perform(post("/almundo/v1/callcenter/director").content(toJson(new Director("DIRECTOR-" + number)))
@@ -182,21 +209,37 @@ public class HomeControllerTest {
 
 	/**
 	 * 
-	 * @param number
+	 * @param number of call ID
 	 */
-	private void createCall(int number, String wait) {
+	private void createCall(final int number, final String wait) {
 		try {
 			mvc.perform(post("/almundo/v1/callcenter/call").param("message", "CALLING-" + number).param("isWait", wait)
 					.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-					.andExpect(status().isCreated());
+					.andExpect(status().isOk());
+		} catch (Exception e) {
+			fail("API-REST not Working");
+		}
+	}
+	
+	/**
+	 * Delete all employees in Queue Manager
+	 * 
+	 */
+	private void deleteEmployees() {
+		try {
+			mvc.perform(delete("/almundo/v1/callcenter/employees")
+					.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk());
 		} catch (Exception e) {
 			fail("API-REST not Working");
 		}
 	}
 
+
 	/**
+	 *   Get byte array Json serializable Object
 	 * 
-	 * @param r serializable object
+	 * @param r
 	 * @return
 	 * @throws Exception
 	 */

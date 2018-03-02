@@ -15,7 +15,8 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
- * 
+ *  Almundo CallCenter Swagger2 Configuration for API-DOC 
+ *  
  * @author fgparamio
  *
  */
@@ -45,7 +46,6 @@ public class SwaggerConfig {
                 .license("Siamak")
                 .licenseUrl("")
                 .version("1.0")
- //               .contact(new Contact("siamak"))
                 .build();
     }
 

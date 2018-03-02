@@ -21,22 +21,25 @@ Operator   <extends>  Employee
 Supervisor <extends>  Employee
 Director   <extends>  Employee 
 
+EmployeeType(Integer priority) => OPERATOR(1), SUPERVISOR(2), DIRECTOR(3)
+
 Employee attributes:
   - String name
-  - String type
-  - Integer priority
+  - EmployeeType type
   
 ```
 
 ## Main Classes
 
 ```
-HomeController => Main App Controller with four API Post Methods:
+AlmundoCallCenterController => Main App Controller with the following methods:
 
-  - /operator    <== Create a new Operator in System (high priority - 1)
-  - /supervisor  <== Create a new Supervisor in System (priority - 2)
-  - /director    <== Create a new Director in System (priority - 3)
-  - /call        <== Simulate have a calling 
+  - (POST)    /operator    <== Create a new Operator in System (high priority - 1)
+  - (POST)    /supervisor  <== Create a new Supervisor in System (priority - 2)
+  - (POST)    /director    <== Create a new Director in System (priority - 3)
+  - (POST)    /call        <== Simulate have a calling 
+  - (DELETE)  /employees   <== Delete all employees from System
+ 
 
 EmployeeService => PriorityBlockingQueue Manager (Employee has Comparable interface)
 
@@ -46,7 +49,7 @@ ThreadPoolTaskExecutor => callcenter.numThreads = 10 (Max Pool Size and Core Siz
 
 Application     =>  Spring Boot Application Configuration
 
-HomeControllerTest  =>  Tests the correct functioning of the required functionality
+AlmundoCallCenterControllerTest  =>  Tests the correct functioning of the required functionality
 
 ```
 
