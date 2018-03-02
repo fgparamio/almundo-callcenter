@@ -21,11 +21,11 @@ Operator   <extends>  Employee
 Supervisor <extends>  Employee
 Director   <extends>  Employee 
 
-EmployeeType(Integer priority) => OPERATOR(1), SUPERVISOR(2), DIRECTOR(3)
+PriorityType(Integer priority) => OPERATOR(1), SUPERVISOR(2), DIRECTOR(3)
 
 Employee attributes:
   - String name
-  - EmployeeType type
+  - PriorityType priorityType
   
 ```
 
@@ -52,6 +52,64 @@ Application     =>  Spring Boot Application Configuration
 AlmundoCallCenterControllerTest  =>  Tests the correct functioning of the required functionality
 
 ```
+
+## API Rest Examples
+
+- Insert a new Operator
+
+```
+POST /almundo/v1/callcenter/operator
+Accept: application/json
+Content-Type: application/json
+
+{"name":"OPERATOR-1"}
+
+RESPONSE: HTTP 201 (Created)
+```
+
+- Insert a new Supervisor
+
+```
+POST /almundo/v1/callcenter/supervisor
+Accept: application/json
+Content-Type: application/json
+
+{"name":"SUPERVISOR-1"}
+
+RESPONSE: HTTP 201 (Created)
+```
+
+- Insert a new Director
+
+```
+POST /almundo/v1/callcenter/director
+Accept: application/json
+Content-Type: application/json
+
+{"name":"DIRECTOR-1"}
+
+RESPONSE: HTTP 201 (Created)
+```
+
+- Simulate a Call 
+
+```
+POST /almundo/v1/callcenter/call
+Content-Type: application/x-www-form-urlencoded
+
+message=LLamando a Almundo CallCenter
+
+RESPONSE: HTTP 200 (OK)
+```
+
+- Delete all Employees
+
+```
+DELETE /almundo/v1/callcenter/employees
+
+RESPONSE: HTTP 200 (OK)
+```
+
 
 ## Build
 
@@ -80,7 +138,11 @@ http://localhost:8090/swagger-ui.html
 
 ## Testing
 
-Use the included Postman collection to test adding and executing tasks
+To test Almundo CallCenter Application
+
+```
+mvn test
+```
 
 ## Tip
 
@@ -88,5 +150,7 @@ For this example, the almundo-callcenter library is included in a local reposito
 installed using mvn install:
 
 ```
-mvn install:install-file -Dfile=<path>/spring-boot-call-center-0.5.0.jar -DgroupId=com.almundo.callcenter -DartifactId=spring-boot-call-center -Dversion=0.5.0 -Dpackaging=jar -DlocalRepositoryPath=repo
+mvn install:install-file -Dfile=<path>/spring-boot-call-center-0.5.0.jar 
+-DgroupId=com.almundo.callcenter -DartifactId=spring-boot-call-center 
+-Dversion=0.5.0 -Dpackaging=jar -DlocalRepositoryPath=repo
 ```

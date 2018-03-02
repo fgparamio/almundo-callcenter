@@ -11,7 +11,7 @@ public class Supervisor extends Employee {
 	 * Default Constructor
 	 */
 	public Supervisor() {
-		super();
+		super("DEFAULT_SUPERVISOR", PriorityType.SUPERVISOR);
 	}
 	
 	/**
@@ -19,6 +19,6 @@ public class Supervisor extends Employee {
 	 * @param name of supervisor employee
 	 */
 	public Supervisor(final String name) {
-		super(name,EmployeeType.SUPERVISOR);
+		super(name,PriorityType.SUPERVISOR);
 	}
 }

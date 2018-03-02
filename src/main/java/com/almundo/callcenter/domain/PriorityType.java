@@ -8,7 +8,7 @@ package com.almundo.callcenter.domain;
  * @author fgparamio
  *
  */
-public enum EmployeeType {
+public enum PriorityType {
 
 	OPERATOR(1),   // the highest priority
 	SUPERVISOR(2), // the medium priority
@@ -21,7 +21,7 @@ public enum EmployeeType {
 	 * 
 	 * @param priority Constructor
 	 */
-	EmployeeType(Integer priority) {
+	PriorityType(Integer priority) {
 		this.priority = priority;
 	}
 	

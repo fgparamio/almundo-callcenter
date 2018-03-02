@@ -11,7 +11,7 @@ public class Director extends Employee {
 	 * Default Constructor 
 	 */
 	public Director() {
-		super();
+		super("DEFAULT_DIRECTOR", PriorityType.OPERATOR);
 	}
 	
 	/**
@@ -19,6 +19,6 @@ public class Director extends Employee {
 	 * @param name of director employee
 	 */
 	public Director(final String name) {
-		super(name,EmployeeType.DIRECTOR);
+		super(name,PriorityType.DIRECTOR);
 	}
 }

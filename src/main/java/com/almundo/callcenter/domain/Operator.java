@@ -11,7 +11,7 @@ public class Operator extends Employee {
 	 * Default Constructor
 	 */
 	public Operator() {
-		super();
+		super("DEFAULT_OPERATOR", PriorityType.OPERATOR);
 	}
 	
 	/**
@@ -19,6 +19,6 @@ public class Operator extends Employee {
 	 * @param name of operator employee
 	 */
 	public Operator(final String name) {
-		super(name,EmployeeType.OPERATOR);
+		super(name,PriorityType.OPERATOR);
 	}		
 }

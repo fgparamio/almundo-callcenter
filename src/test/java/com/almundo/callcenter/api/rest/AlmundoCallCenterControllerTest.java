@@ -245,6 +245,8 @@ final public class AlmundoCallCenterControllerTest {
 	 */
 	private byte[] toJson(Object r) throws Exception {
 		ObjectMapper map = new ObjectMapper();
-		return map.writeValueAsString(r).getBytes();
+		byte[] byteArray = map.writeValueAsString(r).getBytes();
+		LOG.info("JSON: " + new String(byteArray));
+		return byteArray;
 	}
 }

@@ -1,5 +1,7 @@
 package com.almundo.callcenter.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * 	 
  * Almundo CallCenter 
@@ -10,7 +12,9 @@ package com.almundo.callcenter.domain;
 public abstract class Employee implements Comparable<Employee> {
 
 	private String name;
-	private EmployeeType type;
+	
+	@JsonIgnore
+	private PriorityType priorityType;
 	
 	/**
 	 * Default Constructor
@@ -25,9 +29,9 @@ public abstract class Employee implements Comparable<Employee> {
 	 * @param type of employee 
 	 * @param priority
 	 */
-	public Employee(final String name, final EmployeeType type) {
+	public Employee(final String name, final PriorityType type) {
 		this.name = name;
-		this.type = type;
+		this.priorityType = type;
 	}
 
 	/**
@@ -40,10 +44,10 @@ public abstract class Employee implements Comparable<Employee> {
 	
 	/**
 	 * 
-	 * @return employee Type (OPERATOR, SUPERVISOR OR DIRECTOR)
+	 * @return priority employee Type (OPERATOR, SUPERVISOR OR DIRECTOR)
 	 */
-	public EmployeeType getType() {
-		return type;
+	public PriorityType getPriorityType() {
+		return priorityType;
 	}
 
 	/**
@@ -65,10 +69,10 @@ public abstract class Employee implements Comparable<Employee> {
 
 	/**
 	 * 
-	 * @param type of employee
+	 * @param priority type of employee
 	 */
-	public void setType(final EmployeeType type) {
-		this.type = type;
+	public void setPriorityType(final PriorityType priorityType) {
+		this.priorityType = priorityType;
 	}
 	
 	/**
@@ -76,7 +80,7 @@ public abstract class Employee implements Comparable<Employee> {
 	 * @return priority of employee
 	 */
 	public Integer getPriority() {
-		return this.type.getPriority();
+		return this.priorityType.getPriority();
 	}
 
 	
@@ -93,6 +97,6 @@ public abstract class Employee implements Comparable<Employee> {
 	 */
 	@Override
 	public String toString() {
-		return "Employee [name=" + name + ", type=" + type + "]";
+		return "Employee [name=" + name + ", type=" + priorityType + "]";
 	}
 }
