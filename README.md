@@ -142,6 +142,8 @@ To test Almundo CallCenter Application
 
 ```
 mvn test
+
+mvn test -Dlogging.level.com.almundo=DEBUG  (for DEBUG mode)
 ```
 
 ## Tip

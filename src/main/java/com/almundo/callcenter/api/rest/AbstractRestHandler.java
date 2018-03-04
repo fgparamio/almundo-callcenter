@@ -14,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import com.almundo.callcenter.domain.RestErrorInfo;
 import com.almundo.callcenter.exception.BusyConcurrentException;
+import com.almundo.callcenter.exception.NotFreeEmployeesException;
 import com.almundo.callcenter.exception.ResourceNotFoundException;
 
 /**
@@ -30,10 +31,26 @@ public abstract class AbstractRestHandler implements ApplicationEventPublisherAw
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractRestHandler.class);
 	// Spring Event Publisher
 	protected ApplicationEventPublisher eventPublisher;
+	
+	/**
+	 * 
+	 * @param ex when free employees not exist
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(NotFreeEmployeesException.class)
+	public @ResponseBody RestErrorInfo handleDataStoreException(NotFreeEmployeesException ex, WebRequest request,
+			HttpServletResponse response) {
+		LOG.debug("Converting Data Store exception to RestResponse : " + ex.getMessage());
+		return new RestErrorInfo(ex, "Not free employees to attempt calls");
+	}
+
 
 	/**
 	 * 
-	 * @param ex when Threads Pool is busy or free employees not exist
+	 * @param ex when Threads Pool is busy 
 	 * @param request
 	 * @param response
 	 * @return
@@ -42,8 +59,8 @@ public abstract class AbstractRestHandler implements ApplicationEventPublisherAw
 	@ExceptionHandler(BusyConcurrentException.class)
 	public @ResponseBody RestErrorInfo handleDataStoreException(BusyConcurrentException ex, WebRequest request,
 			HttpServletResponse response) {
-		LOG.info("Converting Data Store exception to RestResponse : " + ex.getMessage());
-		return new RestErrorInfo(ex, "You messed up.");
+		LOG.debug("Converting Data Store exception to RestResponse : " + ex.getMessage());
+		return new RestErrorInfo(ex, "PoolMaxConcurrent is busy and not wait");
 	}
 
 	/**

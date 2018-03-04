@@ -12,6 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import com.almundo.callcenter.domain.Employee;
 import com.almundo.callcenter.exception.BusyConcurrentException;
+import com.almundo.callcenter.exception.NotFreeEmployeesException;
 
 /**
  *  Dispather Message Service. Take calls and take head free employee from Queue
@@ -47,18 +48,31 @@ final public class Dispatcher {
 	 */
 	public Future<String> dispatchCall(final String message,final boolean wait) throws InterruptedException, ExecutionException {
 
-		LOG.info("Dispatching message for free employee: "+ message );
-		LOG.info("Call Waiting is: "+ wait);
+		LOG.debug("Dispatching message for free employee: "+ message );
+		LOG.debug("Call Waiting is: "+ wait);
 		
-		if (!wait && (isPoolMaxConcurrent() || notFreeEmployees())) {
+		if (!wait && (isPoolMaxConcurrent())) {
+			
 			LOG.error("-----------------  CALLING REJECT --------------------");
-			LOG.error("------ PoolMaxConcurrent or not free employes --------");		
+			LOG.error("----------------  PoolMaxConcurrent ------------------");
+			LOG.error("---------------  MESSAGE: " + message +   "  ----------------");
 			LOG.error("------------------------------------------------------");
+			
 			// Throws BusyConcurrentException => Bad Request response in API Rest
-			throw new BusyConcurrentException();
+			throw new BusyConcurrentException("PoolMaxConcurrent and No Wait");
+		}
+		
+		if (notFreeEmployees()) {
+			
+			LOG.error("-----------------  CALLING REJECT --------------------");
+			LOG.error("----------------  Not Free Employes ------------------");		
+			LOG.error("------------------------------------------------------");
+			
+			// Throws NotFreeEmployeesException => Bad Request response in API Rest
+			throw new NotFreeEmployeesException("Not free employees to attempt calls");	
 		}
 
-		LOG.info("Submit message Task into ThreadPool: "+ message );
+		LOG.debug("Submit message Task into ThreadPool: "+ message );
 		
 		// Send Callable Task to ThreadPoolTaskExecutor
 		return threadPool.submit(new EmployeeTask(message));
@@ -92,8 +106,8 @@ final public class Dispatcher {
 			// Put new free employee (same employee)
 			employeeService.putEmployee(employee);
 			// Get String result to logger
-			String result = new StringBuilder().append("Employee name: ").append(employee.getName())
-					.append(" Responding message:").append(message).toString();
+			String result = new StringBuilder().append("==>  ").append("Employee name: ").append(employee.getName())
+					.append(" :: Answering message:").append(message).append("  <==").toString();
 			LOG.info(result);
 			return result;
 		}
@@ -112,7 +126,7 @@ final public class Dispatcher {
 	 * @return true if Thread Pool is busy. False otherwise
 	 */
 	private boolean isPoolMaxConcurrent() {
-		return threadPool.getActiveCount() >= threadPool.getMaxPoolSize();
+		return threadPool.getThreadPoolExecutor().getActiveCount() >= threadPool.getMaxPoolSize();
 	}
 
 	/**

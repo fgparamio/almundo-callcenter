@@ -29,7 +29,7 @@ final public class EmployeeService {
 	 * @throws InterruptedException
 	 */
 	public void putEmployee(final Employee employee) throws InterruptedException {
-		LOG.info("Putting employee into Queue: " + employee.toString());
+		LOG.debug("Putting employee into Queue: " + employee.toString());
 		blockingQueue.put(employee);
 	}
 	
@@ -39,7 +39,7 @@ final public class EmployeeService {
 	 * @return
 	 */
 	public Employee peekEmployee() {
-		LOG.info("Peek Head Employee in Queue");
+		LOG.debug("Peek Head Employee in Queue");
 		return blockingQueue.peek();		
 	}
 	
@@ -51,7 +51,7 @@ final public class EmployeeService {
 	 */
 	public Employee takeEmployee() throws InterruptedException {
 		final Employee employee = blockingQueue.take();
-		LOG.info("Take Head Employee in Queue:" + employee.toString());
+		LOG.debug("Take Head Employee in Queue:" + employee.toString());
 		return employee;
 	}
 	
@@ -59,7 +59,7 @@ final public class EmployeeService {
 	 * Atomically removes all of the elements from this queue. The queue will be empty after this call returns.
 	 */
 	public void cleanEmployes() {
-		LOG.info("Clean All Employes in Queue");
+		LOG.debug("Clean All Employes in Queue");
 		this.blockingQueue.clear();
 	}
 		

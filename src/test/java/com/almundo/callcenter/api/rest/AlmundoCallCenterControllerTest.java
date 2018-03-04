@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,6 +48,9 @@ final public class AlmundoCallCenterControllerTest {
 
 	@Autowired
 	WebApplicationContext context;
+	
+	@Autowired
+	private ThreadPoolTaskExecutor threadPool;
 
 	private MockMvc mvc;
 
@@ -60,6 +64,7 @@ final public class AlmundoCallCenterControllerTest {
 
 		MockitoAnnotations.initMocks(this);
 		mvc = MockMvcBuilders.webAppContextSetup(context).build();
+		threadPool.initialize();
 		// Delete employees by EndPoint
 		deleteEmployees();
 	}
@@ -125,14 +130,14 @@ final public class AlmundoCallCenterControllerTest {
 		LOG.info(" *********************** shouldNotWaitingFreeThreads  ********************");
 
 		// Last ten calls not waiting and finish
-		IntStream.rangeClosed(1, 3).forEach(i -> createSupervisor(i));
-		IntStream.rangeClosed(1, 2).forEach(i -> createDirector(i));
+		IntStream.rangeClosed(1, 1).forEach(i -> createSupervisor(i));
+		IntStream.rangeClosed(1, 1).forEach(i -> createDirector(i));
 		IntStream.rangeClosed(1, 8).forEach(i -> createOperator(i));
 		IntStream.rangeClosed(1, 10).forEach(i -> createCall(i, "false"));
 
 		// Launchs 30 calls requests. Some request should not wait 
 		// Some Request with Cause => BusyConcurrentException 
-		IntStream.rangeClosed(1, 30).forEach(i -> {
+		IntStream.rangeClosed(1, 10).forEach(i -> {
 			try {
 				mvc.perform(post("/almundo/v1/callcenter/call").param("message", "CALLING-" + (10 + i))
 						.param("isWait", "false").contentType(MediaType.APPLICATION_JSON)
@@ -142,7 +147,7 @@ final public class AlmundoCallCenterControllerTest {
 			}
 		});
 
-		Thread.sleep(30000);
+		Thread.sleep(20000);
 	}
 
 	/**
@@ -246,7 +251,7 @@ final public class AlmundoCallCenterControllerTest {
 	private byte[] toJson(Object r) throws Exception {
 		ObjectMapper map = new ObjectMapper();
 		byte[] byteArray = map.writeValueAsString(r).getBytes();
-		LOG.info("JSON: " + new String(byteArray));
+		LOG.debug("JSON: " + new String(byteArray));
 		return byteArray;
 	}
 }
