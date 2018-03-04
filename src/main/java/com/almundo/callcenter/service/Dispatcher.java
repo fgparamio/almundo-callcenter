@@ -62,10 +62,11 @@ final public class Dispatcher {
 			throw new BusyConcurrentException("PoolMaxConcurrent and No Wait");
 		}
 		
-		if (notFreeEmployees()) {
+		if (!wait && notFreeEmployees()) {
 			
 			LOG.error("-----------------  CALLING REJECT --------------------");
 			LOG.error("----------------  Not Free Employes ------------------");		
+			LOG.error("---------------  MESSAGE: " + message +   "  ----------------");
 			LOG.error("------------------------------------------------------");
 			
 			// Throws NotFreeEmployeesException => Bad Request response in API Rest

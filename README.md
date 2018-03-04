@@ -4,6 +4,15 @@
 
 A Spring Boot application used to expose a CallCenter Almundo as RESTful API
 
+Application built with:
+
+```
+Java version "1.8.0_121"
+Apache Maven 3.2.3 
+Spring Tool Suite Version: 3.9.2.RELEASE
+
+```
+
 ## 
 
 Configure your threads implementation application.yaml file
@@ -116,7 +125,9 @@ RESPONSE: HTTP 200 (OK)
 To build callcenter-almundo as a war file, run:
 
 ```
-mvn clean package
+mvn clean package;
+
+java -jar target/spring-boot-call-center-0.5.0.war (To run spring-boot App)
 ```
 
 ## Run

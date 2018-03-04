@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -32,7 +33,7 @@ import com.almundo.callcenter.domain.Supervisor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Almundo CallCenter Test
+ * Almundo CallCenter Application Test
  * @author fgparamio
  *
  */
@@ -42,16 +43,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 final public class AlmundoCallCenterControllerTest {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AlmundoCallCenterControllerTest.class);
+	
+	// Maximum threads in Thread Pool to attend by priority queue
+	@Value("${callcenter.numThreads}")
+	private Integer maxNumThreads;
+	
+	@Value("${callcenter.minCallTime}")
+	private Integer minCallTime;
+	
+	@Value("${callcenter.maxCallTime}")
+	private Integer maxCallTime;
 
+	// Main Controller
 	@InjectMocks
 	AlmundoCallCenterController controller;
 
+	// Spring Boot Application Context
 	@Autowired
 	WebApplicationContext context;
 	
+	// ThreadPool in BeanContext
 	@Autowired
 	private ThreadPoolTaskExecutor threadPool;
 
+	// Mocking Spring MVC
 	private MockMvc mvc;
 
 	/**
@@ -70,6 +85,7 @@ final public class AlmundoCallCenterControllerTest {
 	}
 
 	/**
+	 *  Check every operator attend every call
 	 * 
 	 * @throws Exception
 	 */
@@ -78,13 +94,15 @@ final public class AlmundoCallCenterControllerTest {
 
 		LOG.info(" ****************** shouldAllOperatorReceiveCallsOK  *******************");
 
-		IntStream.rangeClosed(1, 10).forEach(i -> createOperator(i));
-		IntStream.rangeClosed(1, 10).forEach(i -> createCall(i, "true"));
-		Thread.sleep(15000);
+		IntStream.rangeClosed(1, maxNumThreads).forEach(i -> createOperator(i));
+		IntStream.rangeClosed(1, maxNumThreads).forEach(i -> createCall(i, "true"));
+		
+		Thread.sleep(maxNumThreads*1000+(maxCallTime-minCallTime)*1000);
 
 	}
 
 	/**
+	 * Check every operator attend every call before the supervisors and directors
 	 * 
 	 * @throws Exception
 	 */
@@ -94,15 +112,17 @@ final public class AlmundoCallCenterControllerTest {
 		LOG.info(" ********************** shouldOperatorsFirstOK  ************************");
 
 		// First calls dispatch operators by priority
-		IntStream.rangeClosed(1, 3).forEach(i -> createSupervisor(i));
-		IntStream.rangeClosed(1, 2).forEach(i -> createDirector(i));
-		IntStream.rangeClosed(1, 5).forEach(i -> createOperator(i));
-		IntStream.rangeClosed(1, 10).forEach(i -> createCall(i, "true"));
+		IntStream.rangeClosed(1, (int)(0.30*maxNumThreads)).forEach(i -> createSupervisor(i));
+		IntStream.rangeClosed(1, (int)(0.20*maxNumThreads)).forEach(i -> createDirector(i));
+		IntStream.rangeClosed(1, maxNumThreads/2).forEach(i -> createOperator(i));
+		IntStream.rangeClosed(1, maxNumThreads).forEach(i -> createCall(i, "true"));
 
-		Thread.sleep(15000);
+		Thread.sleep(maxNumThreads*1000+(maxCallTime-minCallTime)*1000);
+
 	}
 
 	/**
+	 * Check waiting calls throwing double calls than employees
 	 * 
 	 * @throws Exception
 	 */
@@ -112,15 +132,18 @@ final public class AlmundoCallCenterControllerTest {
 		LOG.info(" *********************** shouldWaitingFreeThreads  **********************");
 
 		// Last ten calls waiting free threads
-		IntStream.rangeClosed(1, 3).forEach(i -> createSupervisor(i));
-		IntStream.rangeClosed(1, 2).forEach(i -> createDirector(i));
-		IntStream.rangeClosed(1, 8).forEach(i -> createOperator(i));
-		IntStream.rangeClosed(1, 20).forEach(i -> createCall(i, "true"));
+		IntStream.rangeClosed(1, (int)(0.30*maxNumThreads)).forEach(i -> createSupervisor(i));
+		IntStream.rangeClosed(1, (int)(0.20*maxNumThreads)).forEach(i -> createDirector(i));
+		IntStream.rangeClosed(1, maxNumThreads/2).forEach(i -> createOperator(i));
+		// Throws Double Calls To check waiting
+		IntStream.rangeClosed(1, maxNumThreads*2).forEach(i -> createCall(i, "true"));
 
-		Thread.sleep(30000);
+		Thread.sleep(maxNumThreads*1000+(maxCallTime-minCallTime)*1000*2);
+
 	}
 
 	/**
+	 *  Check Not waiting throwing double calls with isWait parameter to false 
 	 * 
 	 * @throws Exception
 	 */
@@ -130,14 +153,16 @@ final public class AlmundoCallCenterControllerTest {
 		LOG.info(" *********************** shouldNotWaitingFreeThreads  ********************");
 
 		// Last ten calls not waiting and finish
-		IntStream.rangeClosed(1, 1).forEach(i -> createSupervisor(i));
-		IntStream.rangeClosed(1, 1).forEach(i -> createDirector(i));
-		IntStream.rangeClosed(1, 8).forEach(i -> createOperator(i));
-		IntStream.rangeClosed(1, 10).forEach(i -> createCall(i, "false"));
+		IntStream.rangeClosed(1, (int)(0.30*maxNumThreads)).forEach(i -> createSupervisor(i));
+		IntStream.rangeClosed(1, (int)(0.20*maxNumThreads)).forEach(i -> createDirector(i));
+		IntStream.rangeClosed(1, maxNumThreads/2).forEach(i -> createOperator(i));
+		
+		// Launch maxNumThredas calls
+		IntStream.rangeClosed(1, maxNumThreads).forEach(i -> createCall(i, "false"));
 
-		// Launchs 30 calls requests. Some request should not wait 
+		// Launchs maxNumThreads calls requests. Some request should not wait 
 		// Some Request with Cause => BusyConcurrentException 
-		IntStream.rangeClosed(1, 10).forEach(i -> {
+		IntStream.rangeClosed(1, maxNumThreads).forEach(i -> {
 			try {
 				mvc.perform(post("/almundo/v1/callcenter/call").param("message", "CALLING-" + (10 + i))
 						.param("isWait", "false").contentType(MediaType.APPLICATION_JSON)
@@ -147,10 +172,11 @@ final public class AlmundoCallCenterControllerTest {
 			}
 		});
 
-		Thread.sleep(20000);
+		Thread.sleep(maxNumThreads*1000+(maxCallTime-minCallTime)*1000*2);
 	}
 
 	/**
+	 * Check if not employees then BadRequest Response
 	 * 
 	 * @throws Exception
 	 */
@@ -244,13 +270,13 @@ final public class AlmundoCallCenterControllerTest {
 	/**
 	 *   Get byte array Json serializable Object
 	 * 
-	 * @param r
+	 * @param serializable
 	 * @return
 	 * @throws Exception
 	 */
-	private byte[] toJson(Object r) throws Exception {
+	private byte[] toJson(Object serializable) throws Exception {
 		ObjectMapper map = new ObjectMapper();
-		byte[] byteArray = map.writeValueAsString(r).getBytes();
+		byte[] byteArray = map.writeValueAsString(serializable).getBytes();
 		LOG.debug("JSON: " + new String(byteArray));
 		return byteArray;
 	}
